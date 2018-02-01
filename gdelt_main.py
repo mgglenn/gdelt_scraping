@@ -26,14 +26,14 @@ def process_link(link):
     clean_text = gscrape.clean_text(str(text))
     print(clean_text)
 
+
 if __name__ == "__main__":
     # argument parsing
     args = build_args()
     print(args.link_file)
 
     link_data = open(args.link_file).readlines()
-    links = [link.split('\n')[0] for link in link_data]
+    links = [link.split('\t')[-1][:-1] for link in link_data]
 
     for l in links:
 	    process_link(l)
-	    print("\n\n")
