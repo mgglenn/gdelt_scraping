@@ -2,8 +2,35 @@ import re
 import urllib.request as ur
 import string
 import codecs 
-
 from timeout import timeout
+from datetime import timedelta, date
+
+def daterange(date1, date2):
+    for n in range(int ((date2 - date1).days)+1):
+        yield date1 + timedelta(n)
+
+
+def generate_files(start, end, template='http://data.gdeltproject.org/events/index.html/%s.export.CSV.zip'):
+    """
+    Generates a list of csv files to grab.
+    :param start: the beginning date in the YYYY-MM-DD format
+    :param end: the ending date in the YYYY-MM-DD format
+    :returns: list of links to get
+    """
+    links = []
+    year1, month1, day1 = start.split("-")
+    year2, month2, day2 = end.split("-")                                                  
+
+    start_dt = date(int(year1), int(month1), int(day1))
+    end_dt = date(int(year2), int(month2), int(day2))
+
+    for dt in daterange(start_dt, end_dt):
+        date_string = dt.strftime("%Y%m%d")
+        link = template % date_string
+        links.append(link)
+
+    return links
+
 
 def grab_links(filename):
   lines = open(filename).readlines()
