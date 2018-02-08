@@ -4,13 +4,16 @@ import string
 import codecs 
 from timeout import timeout
 from datetime import timedelta, date
+import urllib.request
+import zipfile
+
 
 def daterange(date1, date2):
     for n in range(int ((date2 - date1).days)+1):
         yield date1 + timedelta(n)
 
 
-def generate_files(start, end, template='http://data.gdeltproject.org/events/index.html/%s.export.CSV.zip'):
+def generate_files(start, end, template='http://data.gdeltproject.org/events/%s.export.CSV.zip'):
     """
     Generates a list of csv files to grab.
     :param start: the beginning date in the YYYY-MM-DD format
@@ -43,8 +46,18 @@ def grab_links(filename):
   return links
 
 
+def extract_links(link, data_path='.'):
+	# generate filename	
+	zip_file = urllib.request.urlretrieve(link)
+	zip_ref = zipfile.ZipFile(zip_file, 'r')
+	zip_ref.extractall(data_path)
+	zip_ref.close()
+	csv_file = ''
+	return grab_links(csv_file)
+	
+
 def clean_text(text):
-  cleantext = codecs.getdecoder("unicode_escape")(text)[0]
+  cleantext = codecs.getdecoder("unicode_escape")(text)
 
   # clean html
   cleanr = re.compile('<.*?>')
@@ -65,3 +78,8 @@ def get_text(link):
     return str(page.read()) 
   except:
     return ''
+
+
+def process_link(link):
+	text = get_text(link)
+	return clean_text(text)
