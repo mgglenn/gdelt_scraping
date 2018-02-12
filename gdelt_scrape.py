@@ -4,8 +4,8 @@ import string
 import codecs 
 from timeout import timeout
 from datetime import timedelta, date
-import urllib.request
 import zipfile
+import wget
 
 
 def daterange(date1, date2):
@@ -46,19 +46,18 @@ def grab_links(filename):
   return links
 
 
-def extract_links(link, path=''):
-    zip_file = urllib.request.urlretrieve(link)
+def extract_csv(link, path=''):
+    zip_file = wget.download(link, out=path)
     zip_ref = zipfile.ZipFile(zip_file, 'r')
     zip_ref.extractall(path)
     zip_ref.close()
-    file_name = link.split('/')[-1]
-    file_name = file_name[:file_name.indexof('.zip')]
-    file_name = path + '/' + file_name
-    print(zip_name)	
+    csv_file = zip_ref.filename[:zip_ref.filename.index('.zip')]
+    zip_ref.close()
+    return csv_file
 
 
 def clean_text(text):
-  cleantext = codecs.getdecoder("unicode_escape")(text)
+  cleantext = codecs.getdecoder("unicode_escape")(text)[0]
 
   # clean html
   cleanr = re.compile('<.*?>')
@@ -69,13 +68,18 @@ def clean_text(text):
   cleantext = re.sub(cleanr, ' ', cleantext)
 
   cleantext = ' '.join(cleantext.split('\n'))
+  cleantext.replace('\\', '')
+  cleantext = cleantext.lower()
   return cleantext
 
 
 @timeout(3)
-def get_text(link, outfile=None):
+def get_text(link):
   try:
     page = ur.urlopen(link)
-    return str(page.read()) 
+    raw = page.read() 
+    clean = clean_text(raw)
+    clean = clean_text(clean)
+    return clean
   except:
     return ''

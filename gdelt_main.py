@@ -27,14 +27,33 @@ def build_args():
 
 
 def process_date(link=None, folder=''):
-    print("Downloading...")
-    gscrape.extract_links(link=link, data_path=folder)
-    
+    # Download CSV
+    csv_file = gscrape.extract_csv(link=link, path=folder)
+
+    # grab the links from the CSV and start scraping them
+    links = gscrape.grab_links(filename=csv_file)
+    outfile = csv_file[:csv_file.index(".CSV")] + ".txt"
+
+    links_written = 0
+    out = open(outfile, 'w')
+    for link in links:
+        text = gscrape.get_text(link=link)
+        if text != '':
+            try:
+                out.write(text)
+                out.write('\n')
+                links_written = links_written + 1
+            except:
+                continue
+
+    return (links_written, len(links))	
+
 
 if __name__ == "__main__":
     # argument parsing
     args = build_args()
 
-	# generate some links
+    # generate some links
     links = gscrape.generate_links(start=args.start_date, end=args.end_date)	
-    print(links[0])
+    print(links)
+    process_date(links[0], folder=args.output_folder)
