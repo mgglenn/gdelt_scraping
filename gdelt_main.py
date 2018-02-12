@@ -7,33 +7,34 @@ import gdelt_scrape as gscrape
 
 def build_args():
     """
-    Build out arguments for gett linnks.
+    Build out arguments for getting linnks.
     """
     parser = argparse.ArgumentParser()
-    parser.add_argument("--link_file",\
-			help="Location of your links to process.",\
+
+    parser.add_argument("--start_date",\
+			help="What date do we start collecting on? YYYY-MM-DD format.",\
+			type=str)
+
+    parser.add_argument("--end_date",\
+			help="What date do we start collecting on? YYYY-MM-DD format.",\
 			type=str)
 
     parser.add_argument("--output_folder",\
-			help="Where to write your files.",\
+			help="Where are we outputting the files (one per day)?.",\
 			type=str)
 
     return parser.parse_args()
 
 
-def process_link(link):
-    text = gscrape.get_text(link)
-    clean_text = gscrape.clean_text(str(text))
-    print(clean_text)
-
+def process_date(link=None, folder=''):
+    print("Downloading...")
+    gscrape.extract_links(link=link, data_path=folder)
+    
 
 if __name__ == "__main__":
     # argument parsing
     args = build_args()
-    print(args.link_file)
 
-    link_data = open(args.link_file).readlines()
-    links = [link.split('\t')[-1][:-1] for link in link_data]
-
-    for l in links:
-	    process_link(l)
+	# generate some links
+    links = gscrape.generate_links(start=args.start_date, end=args.end_date)	
+    print(links[0])

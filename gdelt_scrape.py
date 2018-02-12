@@ -13,11 +13,11 @@ def daterange(date1, date2):
         yield date1 + timedelta(n)
 
 
-def generate_files(start, end, template='http://data.gdeltproject.org/events/%s.export.CSV.zip'):
+def generate_links(start, end, template='http://data.gdeltproject.org/events/%s.export.CSV.zip'):
     """
     Generates a list of csv files to grab.
-    :param start: the beginning date in the YYYY-MM-DD format
-    :param end: the ending date in the YYYY-MM-DD format
+    :param start: the beginning date in the YYYY-MM-DD format (str)
+    :param end: the ending date in the YYYY-MM-DD format (str)
     :returns: list of links to get
     """
     links = []
@@ -46,15 +46,16 @@ def grab_links(filename):
   return links
 
 
-def extract_links(link, data_path='.'):
-	# generate filename	
-	zip_file = urllib.request.urlretrieve(link)
-	zip_ref = zipfile.ZipFile(zip_file, 'r')
-	zip_ref.extractall(data_path)
-	zip_ref.close()
-	csv_file = ''
-	return grab_links(csv_file)
-	
+def extract_links(link, path=''):
+    zip_file = urllib.request.urlretrieve(link)
+    zip_ref = zipfile.ZipFile(zip_file, 'r')
+    zip_ref.extractall(path)
+    zip_ref.close()
+    file_name = link.split('/')[-1]
+    file_name = file_name[:file_name.indexof('.zip')]
+    file_name = path + '/' + file_name
+    print(zip_name)	
+
 
 def clean_text(text):
   cleantext = codecs.getdecoder("unicode_escape")(text)
@@ -72,14 +73,9 @@ def clean_text(text):
 
 
 @timeout(3)
-def get_text(link):
+def get_text(link, outfile=None):
   try:
     page = ur.urlopen(link)
     return str(page.read()) 
   except:
     return ''
-
-
-def process_link(link):
-	text = get_text(link)
-	return clean_text(text)
