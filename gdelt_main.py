@@ -1,9 +1,13 @@
+#!/usr/bin/env python                                                                     
+
 import argparse
 import sys
 from joblib import Parallel, delayed 
+import numpy
+from mpi4py import MPI
+
 # custom imports
 import gdelt_scrape as gscrape
-
 
 def build_args():
     """
@@ -53,7 +57,20 @@ if __name__ == "__main__":
     # argument parsing
     args = build_args()
 
+    # dist stuff
+    comm = MPI.COMM_WORLD
+    rank = comm.Get_rank()
+    num = comm.Get_size()
+
+    link_buckets = []
+    for i in range(0, num):
+        link_buckets.append([])
+
     # generate some links
     links = gscrape.generate_links(start=args.start_date, end=args.end_date)	
-    print(links)
-    process_date(links[0], folder=args.output_folder)
+    
+    for i, link in enumerate(links):
+        link_buckets[i%num].append(link)    
+    
+    for link in link_buckets[rank]:
+        process_date(link=link, folder=args.output_folder)
