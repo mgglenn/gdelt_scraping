@@ -15,7 +15,7 @@ def daterange(date1, date2):
 
 def generate_links(start, end, template='http://data.gdeltproject.org/events/%s.export.CSV.zip'):
     """
-    Generates a list of csv files to grab.
+    Generates a list of web pages to grab.
     :param start: the beginning date in the YYYY-MM-DD format (str)
     :param end: the ending date in the YYYY-MM-DD format (str)
     :returns: list of links to get
@@ -35,15 +35,16 @@ def generate_links(start, end, template='http://data.gdeltproject.org/events/%s.
     return links
 
 
-def grab_links(filename):
+def grab_csv_data(filename):
   lines = open(filename).readlines()
-  links = []
+  data = []
 
-  for l in lines:
+  for line_id, l in enumerate(lines):
+    comps = l.split('\t')
     link = l.split('\t')[-1][:-1] # remove newline
-    links.append(link)
+    data.append([line_id, comps[-2], link])
 	
-  return links
+  return data
 
 
 def extract_csv(link, path=''):
@@ -58,7 +59,7 @@ def extract_csv(link, path=''):
 
 def clean_text(text):
   cleantext = codecs.getdecoder("unicode_escape")(text)[0]
-
+  """
   # clean html
   cleanr = re.compile('<.*?>')
   cleantext = re.sub(cleanr, ' ', cleantext)
@@ -68,8 +69,9 @@ def clean_text(text):
   cleantext = re.sub(cleanr, ' ', cleantext)
 
   cleantext = ' '.join(cleantext.split('\n'))
-  cleantext.replace('\\', '')
+  cleantext.replace('\t', ' ')
   cleantext = cleantext.lower()
+  """
   return cleantext
 
 
