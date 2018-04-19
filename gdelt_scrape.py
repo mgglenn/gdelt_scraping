@@ -6,7 +6,8 @@ from timeout import timeout
 from datetime import timedelta, date
 import zipfile
 import wget
-
+# import requests
+from bs4 import BeautifulSoup
 
 def daterange(date1, date2):
     for n in range(int ((date2 - date1).days)+1):
@@ -42,7 +43,8 @@ def grab_csv_data(filename):
   for line_id, l in enumerate(lines):
     comps = l.split('\t')
     link = l.split('\t')[-1][:-1] # remove newline
-    data.append([line_id, comps[-2], link])
+    date = comps[-2]
+    data.append([line_id, date, link])
 	
   return data
 
@@ -58,21 +60,12 @@ def extract_csv(link, path=''):
 
 
 def clean_text(text):
-  cleantext = codecs.getdecoder("unicode_escape")(text)[0]
-  """
-  # clean html
-  cleanr = re.compile('<.*?>')
-  cleantext = re.sub(cleanr, ' ', cleantext)
-
-  # clean braket
-  cleanr = re.compile('{.*?}')
-  cleantext = re.sub(cleanr, ' ', cleantext)
-
-  cleantext = ' '.join(cleantext.split('\n'))
-  cleantext.replace('\t', ' ')
-  cleantext = cleantext.lower()
-  """
-  return cleantext
+    text = text.replace('\n', ' ')
+    text = text.replace('\t', ' ')
+    text = re.sub('{.*?}', '', text)
+    text = re.sub('([.*?])', '', text)
+    text = re.sub(r'[^\x00-\x7f]',r'', text) 
+    return text.lower()
 
 
 @timeout(3)
@@ -80,8 +73,12 @@ def get_text(link):
   try:
     page = ur.urlopen(link)
     raw = page.read() 
+    # resp = requests.get(link)
+    # text = resp.text
+    text = raw.decode(encoding="UTF-8")
+    soup = BeautifulSoup(text, "lxml")
+    raw = soup.text
     clean = clean_text(raw)
-    clean = clean_text(clean)
     return clean
   except:
     return ''

@@ -55,8 +55,7 @@ def process_date(link=None, folder='', limit=1000):
         writer = csv.writer(csvfile, delimiter='\t', quotechar='|', quoting=csv.QUOTE_MINIMAL)
         for event in data:
             new_row = list(event)
-            # text = gscrape.get_text(link=new_row[-1])
-            text = 'testing string'
+            text = gscrape.get_text(link=new_row[-1])
             if text != '':
                 try:
                     new_row.append(text)
